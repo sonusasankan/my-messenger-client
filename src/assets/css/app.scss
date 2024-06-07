@@ -1,0 +1,28 @@
+@import url('./reset.css');
+
+.app-mychat-chatbox{
+    display: flex;
+    min-height: 100vh;
+}
+
+.app-mychat-people{
+    flex-basis: 25%;
+    border-right: 1px solid #000;
+}
+
+.app-mychat-window{
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+.app-mychat-people{
+    &_list-item{
+        padding: 16px;
+        cursor: pointer;
+        &.active{
+            background-color: #e2e2e2;
+        }
+    }
+}
