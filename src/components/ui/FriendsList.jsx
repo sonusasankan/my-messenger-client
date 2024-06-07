@@ -15,7 +15,7 @@ function FriendsList({ selectFriend, selected }) {
             key={friend._id}
             onClick={() => selectFriend(friend)}
           >
-            {friend.username}
+            <h4>{friend.username}</h4>
           </li>
         ))}
       </ul>

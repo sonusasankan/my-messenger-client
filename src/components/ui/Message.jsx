@@ -3,7 +3,7 @@ import React from 'react';
 function Message({ message }) {
   return (
     <div className="app-mychat-chatbox_message-item">
-      <strong>{message}</strong>
+      <p className="app-mychat-chatbox-message-text">{message}</p>
     </div>
   );
 }

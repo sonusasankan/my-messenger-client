@@ -1,4 +1,22 @@
 @import url('./reset.css');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+$primary-font: "Montserrat", sans-serif;
+$primary-color: #542344;
+$secondary-color: #D8BFAA;
+$teritiary-color: #EBF5EE;
+$white: #ffffff;
+
+h1,h2,h3,h4,h5,h6{
+    font-family: $primary-font;
+}
+.type-primary {
+    font-family: $primary-font;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
 
 .app-mychat-chatbox{
     display: flex;
@@ -8,6 +26,7 @@
 .app-mychat-people{
     flex-basis: 25%;
     border-right: 1px solid #000;
+    background-color: $primary-color;
 }
 
 .app-mychat-window{
@@ -15,14 +34,89 @@
     flex-direction: column;
     flex-grow: 1;
     justify-content: space-between;
+    max-height: 100vh;
+    &_chat-header{
+        padding: 16px;
+        background-color: $secondary-color;
+        h6{
+            font-weight: 600;
+        }
+    }
+}
+
+.app-mychat-chatbox_messages{
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 16px;
+    background-color: $teritiary-color;
+    overflow: scroll;
+}
+.app-mychat-chatbox_message-item{
+    background: #d0dad3;
+    display: inline;
+    padding: 12px;
+    border-radius: 7.5px;
+    align-self: flex-start;
+    &:not(:last-child){
+        margin-bottom: 24px;
+    }
+}
+
+.app-mychat-chatbox-message-text{
+    font-family: $primary-font;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.app-mychat-chatbox_message-form{
+    background-color: $secondary-color;
+    padding: 32px;
+    display: flex;
+    textarea{
+        box-sizing: border-box;
+        min-height: 50px;
+        flex-grow: 1;
+        margin-right: 16px;
+        border-radius: 6px;
+        border: none;
+        padding: 8px;
+        outline: #000;
+        background-color: #bda591;
+        &:focus{
+            border: 1px solid #54234493;
+        }
+    }
+    button[type='submit']{
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        background-color: $primary-color;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        &:disabled{
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        img{
+            max-width: 24px;
+            margin-left: 4px;
+        }
+    }
 }
 
 .app-mychat-people{
     &_list-item{
         padding: 16px;
         cursor: pointer;
+        h4{
+            color: $teritiary-color;
+        }
         &.active{
-            background-color: #e2e2e2;
+            background-color: #431835;
         }
     }
 }

@@ -1,4 +1,4 @@
-import { useContext, useEffect} from "react";
+import { useContext, useEffect, useCallback, useState} from "react";
 
 //context
 import { MessageContext, MessageDispatchContext, UserContext, SelectedFriendContext, SelectedFriendDispatchContext  } from "./store";
@@ -15,6 +15,8 @@ function App() {
   const messages = useContext(MessageContext);
   const selectedFriend = useContext(SelectedFriendContext);
   const selectedFriendDispatch = useContext(SelectedFriendDispatchContext);
+  const [hasMore, setHasMore] = useState(true);
+
 
   const messagesDispatch = useContext(MessageDispatchContext)
 
@@ -34,6 +36,30 @@ function App() {
     }
   }, [selectedFriend, user, messagesDispatch]);
 
+  const fetchMessages = useCallback(async () => {
+    if (!selectedFriend) return;
+    const response = await fetch(`http://localhost:5000/api/messages?sender=${user}&receiver=${selectedFriend._id}&limit=10`);
+    const data = await response.json();
+    messagesDispatch({ type: 'FETCH_SUCCESS', payload: data });
+    setHasMore(data.length >= 10);
+  }, [selectedFriend, user, messagesDispatch]);
+
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
+
+  const loadMoreMessages = useCallback(async () => {
+    // console.log(!selectedFriend || !messages.data.length);
+    if (!selectedFriend || !messages.data.length) return;
+    console.log('load more');
+    const lastMessage = messages.data[0];
+    const response = await fetch(`http://localhost:5000/api/messages?sender=${user}&receiver=${selectedFriend._id}&before=${lastMessage.timestamp}&limit=5`);
+    const data = await response.json();
+    if (data.length < 5) {
+      setHasMore(false);
+    }
+    messagesDispatch({ type: 'FETCH_SUCCESS', payload: [...data, ...messages.data] });
+  }, [selectedFriend, user, messages, messagesDispatch]);
 
   const handleSendMessage = async (message) => {
     try {
@@ -63,7 +89,8 @@ function App() {
       <div className="app-mychat">
         <div className="app-mychat-chatbox">
           <FriendsList selectFriend={handleSelectFriend} selected={selectedFriend ? selectedFriend: ''}/>
-          <ChatWindow onSendMessage={handleSendMessage} name={selectedFriend ? selectedFriend.username: ''} messages={messages.data} />
+          <ChatWindow onSendMessage={handleSendMessage} name={selectedFriend ? selectedFriend.username: ''} messages={messages.data} loadMoreMessages={loadMoreMessages} hasMore={hasMore}
+ />
         </div>
       </div>
   );

@@ -1,13 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+import sendSvg from '../../assets/images/send.svg';
 
 function MessageInput({ onSendMessage }) {
   const [message, setMessage] = useState('');
+  const [isValid, setIsValid] = useState(false);
+
+  useEffect(() => {
+    // Validate the message
+    if (message.trim().length > 0) {
+      setIsValid(true);
+    } else {
+      setIsValid(false);
+    }
+  }, [message]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (message.trim()) {
+    if (isValid) {
       onSendMessage(message);
       setMessage('');
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevent newline in textarea
+      handleSubmit(e);
     }
   };
 
@@ -17,9 +36,13 @@ function MessageInput({ onSendMessage }) {
         type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type a message"
+        onKeyDown={handleKeyDown}
+        placeholder="Type your message"
+        
       />
-      <button type="submit">Send</button>
+      <button type="submit" disabled={!isValid}>
+        <img src={sendSvg} alt='Send message'/>
+      </button>
     </form>
   );
 }
