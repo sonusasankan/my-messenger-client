@@ -1,26 +1,79 @@
 import { createContext, useReducer, useEffect, useState } from "react";
 
+export const UserContext = createContext();
+export const UserDispatchContext = createContext();
+
 export const FriendsContext = createContext();
 export const FriendsDispatchContext = createContext(null);
 
 export const MessageContext = createContext();
 export const MessageDispatchContext = createContext(null);
 
+export const SelectedFriendContext = createContext();
+export const SelectedFriendDispatchContext = createContext();
+
+const selectedFriendData = {
+  person: null
+};
+
+//User
+const initialUser = {
+  user: "6661b169d3f85f84e657c5fc",
+  isAuthenticated: false,
+};
+
+// Action types
+const SET_USER = "SET_USER";
+const UPDATE_USER = "UPDATE_USER";
+const LOGOUT = "LOGOUT";
+const SET_SELECTED_FRIEND = "SET_SELECTED_FRIEND";
+
+
+//User Reducer function
+const userReducer = (state, action) => {
+  switch (action.type) {
+    case SET_USER:
+      return {
+        ...state,
+        user: action.payload,
+        isAuthenticated: true,
+      };
+    case UPDATE_USER:
+      return {
+        ...state,
+        user: { ...state.user, ...action.payload },
+      };
+    case LOGOUT:
+      return {
+        ...state,
+        user: null,
+        isAuthenticated: false,
+      };
+    default:
+      return state;
+  }
+};
+
 //Setting up an empty array for initial data
-const initialData = [
-  {
-    _id: "6661b169d3f85f84e657c5fd",
-    username: "Bob",
-  },
-  // {
-  //   _id: '6661b169d3f85f84e657c5fc',
-  //   username: "Alice",
-  // },
-  {
-    _id: "6661b169d3f85f84e657c5fe",
-    username: "Charlie",
-  },
-];
+const initialData = {
+  friendsList: [
+    {
+      _id: "6661b169d3f85f84e657c5fd",
+      username: "Bob",
+    },
+    // {
+    //   _id: '6661b169d3f85f84e657c5fc',
+    //   username: "Alice",
+    // },
+    {
+      _id: "6661b169d3f85f84e657c5fe",
+      username: "Charlie",
+    },
+  ],
+  recent: "",
+  loading: false,
+  error: null,
+};
 
 //Reducer for fetch data from the API
 const friendsReducer = (state, action) => {
@@ -28,14 +81,14 @@ const friendsReducer = (state, action) => {
     case "FETCH_SUCCESS":
       return {
         ...state,
-        data: action.payload,
+        friendsList: action.payload,
         loading: false,
         error: null,
       };
     case "FETCH_ERROR":
       return {
         ...state,
-        data: [],
+        friendsList: [],
         loading: false,
         error: action.payload,
       };
@@ -90,23 +143,65 @@ export const messageReducer = (state, action) => {
   }
 };
 
+// Selected Friend Reducer function
+const selectedFriendReducer = (state, action) => {
+  switch (action.type) {
+    case SET_SELECTED_FRIEND:
+      return {
+        ...state,
+        person: action.payload,
+      };
+    default:
+      return state;
+  }
+};
+
 //Function to return the products and cart context provider.
 export function ContextProvider({ children }) {
-  const [friends, friendsDispatch] = useReducer(friendsReducer, initialData);
+  const [userData, userDispatch] = useReducer(userReducer, initialUser);
+  const [friendsData, friendsDispatch] = useReducer(friendsReducer, initialData);
   const [messages, messagesDispatch] = useReducer(
     messageReducer,
     initialMessages
   );
+  const [selectedFriend, selectedFriendDispatch] = useReducer(selectedFriendReducer, selectedFriendData);
+
+  const { user } = userData;
+  const { friendsList } = friendsData;
+  const { person } = selectedFriend;
+
+  useEffect(() => {
+    // Fetch the most recent friend when the component mounts
+    fetch(`http://localhost:5000/api/messages/recent/${user}`)
+      .then((response) => response.json())
+      .then((mostRecentFriend) => {
+        selectedFriendDispatch({ type: SET_SELECTED_FRIEND, payload: mostRecentFriend });
+      });
+  }, []);
+
+  useEffect(()=>{
+    fetch(`http://localhost:5000/api/friends/${user}`)
+    .then(response => response.json())
+    .then(data => friendsDispatch({ type: 'FETCH_SUCCESS', payload: data}))
+  }, [messages])
 
   return (
-    <FriendsContext.Provider value={friends}>
-      <FriendsDispatchContext.Provider value={friendsDispatch}>
-        <MessageContext.Provider value={messages}>
-          <MessageDispatchContext.Provider value={messagesDispatch}>
-            {children}
-          </MessageDispatchContext.Provider>
-        </MessageContext.Provider>
-      </FriendsDispatchContext.Provider>
-    </FriendsContext.Provider>
+    <UserContext.Provider value={user}>
+      <UserDispatchContext.Provider value={userDispatch}>
+        <FriendsContext.Provider value={friendsList}>
+          <FriendsDispatchContext.Provider value={friendsDispatch}>
+            <MessageContext.Provider value={messages}>
+              <MessageDispatchContext.Provider value={messagesDispatch}>
+                <SelectedFriendContext.Provider value={person}>
+                    <SelectedFriendDispatchContext.Provider value={selectedFriendDispatch}>
+                      {children}
+                    </SelectedFriendDispatchContext.Provider>
+                </SelectedFriendContext.Provider>
+              </MessageDispatchContext.Provider>
+            </MessageContext.Provider>
+          </FriendsDispatchContext.Provider>
+        </FriendsContext.Provider>
+      </UserDispatchContext.Provider>
+    </UserContext.Provider>
   );
 }
