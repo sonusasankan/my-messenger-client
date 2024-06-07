@@ -10,7 +10,7 @@ function FriendsList({ selectFriend, selected }) {
         {friendsData.map((friend) => (
           <li
             className={`app-mychat-people_list-item ${
-              selected._id == friend._id ? "active" : ""
+              selected._id === friend._id ? "active" : ""
             }`}
             key={friend._id}
             onClick={() => selectFriend(friend)}

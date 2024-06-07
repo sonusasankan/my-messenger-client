@@ -1,4 +1,4 @@
-import { createContext, useReducer, useEffect, useState } from "react";
+import { createContext, useReducer, useEffect} from "react";
 
 export const UserContext = createContext();
 export const UserDispatchContext = createContext();
@@ -177,13 +177,13 @@ export function ContextProvider({ children }) {
       .then((mostRecentFriend) => {
         selectedFriendDispatch({ type: SET_SELECTED_FRIEND, payload: mostRecentFriend });
       });
-  }, []);
+  }, [user]);
 
   useEffect(()=>{
     fetch(`http://localhost:5000/api/friends/${user}`)
     .then(response => response.json())
     .then(data => friendsDispatch({ type: 'FETCH_SUCCESS', payload: data}))
-  }, [messages])
+  })
 
   return (
     <UserContext.Provider value={user}>

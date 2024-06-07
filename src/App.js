@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useReducer  } from "react";
+import { useContext, useEffect} from "react";
 
 //context
 import { MessageContext, MessageDispatchContext, UserContext, SelectedFriendContext, SelectedFriendDispatchContext  } from "./store";
@@ -15,7 +15,6 @@ function App() {
   const messages = useContext(MessageContext);
   const selectedFriend = useContext(SelectedFriendContext);
   const selectedFriendDispatch = useContext(SelectedFriendDispatchContext);
-  // const [messages, setMessages] = useState([]);
 
   const messagesDispatch = useContext(MessageDispatchContext)
 
@@ -33,7 +32,7 @@ function App() {
       };
       fetchMessages();
     }
-  }, [selectedFriend]);
+  }, [selectedFriend, user, messagesDispatch]);
 
 
   const handleSendMessage = async (message) => {

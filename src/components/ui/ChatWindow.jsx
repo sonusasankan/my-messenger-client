@@ -1,5 +1,3 @@
-import { useContext} from 'react';
-import { FriendsContext } from "../../store";
 
 //Form
 import MessageInput from '../form/MessageInput';
