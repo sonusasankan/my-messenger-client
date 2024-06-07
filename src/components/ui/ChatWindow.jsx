@@ -6,14 +6,14 @@ import MessageInput from '../form/MessageInput';
 
 //UI
 import ChatHeader from './ChatHeader';
-
+import MessageList from './MessageList';
 
 function ChatWindow({ name, messages, onSendMessage }) {
-    const friends = useContext(FriendsContext);
    
   return (
     <div className="app-mychat-window">
       <ChatHeader name={name}/>
+      <MessageList messages={messages}/>
       <MessageInput onSendMessage={onSendMessage} />
     </div>
   );
