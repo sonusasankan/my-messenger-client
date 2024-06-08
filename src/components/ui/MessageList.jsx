@@ -38,7 +38,7 @@ const MessageList = ({ messages, loadMoreMessages, hasMore }) => {
   return (
     <div className="app-mychat-chatbox_messages" ref={containerRef}>
       {messages.length ? (
-        messages.map((msg) => <Message key={msg._id} message={msg.message} />)
+        messages.map((msg) => <Message sender={msg.sender} key={msg._id} message={msg.message} />)
       ) : (
         <p>Loading...</p>
       )}

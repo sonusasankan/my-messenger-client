@@ -48,18 +48,21 @@ h1,h2,h3,h4,h5,h6{
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    padding: 16px;
+    padding: 64px;
     background-color: $teritiary-color;
     overflow: scroll;
 }
 .app-mychat-chatbox_message-item{
     background: #d0dad3;
-    display: inline;
+    display: inline-flex;
     padding: 12px;
     border-radius: 7.5px;
     align-self: flex-start;
     &:not(:last-child){
         margin-bottom: 24px;
+    }
+    &.right{
+        align-self: flex-end;
     }
 }
 

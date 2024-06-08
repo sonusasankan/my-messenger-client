@@ -36,7 +36,7 @@ function App() {
     }
   }, [selectedFriend, user, messagesDispatch]);
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessagesNew = useCallback(async () => {
     if (!selectedFriend) return;
     const response = await fetch(`http://localhost:5000/api/messages?sender=${user}&receiver=${selectedFriend._id}&limit=10`);
     const data = await response.json();
@@ -45,21 +45,28 @@ function App() {
   }, [selectedFriend, user, messagesDispatch]);
 
   useEffect(() => {
-    fetchMessages();
-  }, [fetchMessages]);
+    fetchMessagesNew();
+  }, [fetchMessagesNew]);
 
   const loadMoreMessages = useCallback(async () => {
-    // console.log(!selectedFriend || !messages.data.length);
     if (!selectedFriend || !messages.data.length) return;
-    console.log('load more');
+    
     const lastMessage = messages.data[0];
-    const response = await fetch(`http://localhost:5000/api/messages?sender=${user}&receiver=${selectedFriend._id}&before=${lastMessage.timestamp}&limit=5`);
+    const response = await fetch(`http://localhost:5000/api/messages/load?sender=${user}&receiver=${selectedFriend._id}&before=${lastMessage.timestamp}&limit=5`);
     const data = await response.json();
-    if (data.length < 5) {
+
+    // Check for duplicates and only add new messages
+    const existingMessageIds = new Set(messages.data.map(msg => msg._id));
+    const newMessages = data.filter(msg => !existingMessageIds.has(msg._id));
+    
+    if (newMessages.length < 5) {
       setHasMore(false);
     }
-    messagesDispatch({ type: 'FETCH_SUCCESS', payload: [...data, ...messages.data] });
-  }, [selectedFriend, user, messages, messagesDispatch]);
+    
+    // Dispatch new messages to the context
+    messagesDispatch({ type: 'FETCH_SUCCESS', payload: [...newMessages, ...messages.data] });
+}, [selectedFriend, user, messages, messagesDispatch]);
+
 
   const handleSendMessage = async (message) => {
     try {
