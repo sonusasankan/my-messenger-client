@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 import sendSvg from '../../assets/images/send.svg';
 
-function MessageInput({ onSendMessage }) {
-  const [message, setMessage] = useState('');
+function MessageInput({ onSendMessage, currentMessage, setCurrentMessage }) {
+  const [message, setMessage] = useState(currentMessage);
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
@@ -15,13 +15,22 @@ function MessageInput({ onSendMessage }) {
     }
   }, [message]);
 
+  useEffect(()=>{
+    setMessage(currentMessage);
+  },[currentMessage])
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isValid) {
       onSendMessage(message);
-      setMessage('');
+      setCurrentMessage('');
     }
   };
+
+  const handleSetMessage = (e) => {
+    setMessage(e.target.value);
+    setCurrentMessage(e.target.value);
+  }
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -35,7 +44,7 @@ function MessageInput({ onSendMessage }) {
       <textarea
         type="text"
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={handleSetMessage}
         onKeyDown={handleKeyDown}
         placeholder="Type your message"
         

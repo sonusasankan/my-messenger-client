@@ -6,19 +6,23 @@ function FriendsList({ selectFriend, selected }) {
 
   return (
     <div className="app-mychat-people">
-      <ul className="app-mychat-people_list">
-        {friendsData.map((friend) => (
-          <li
-            className={`app-mychat-people_list-item ${
-              selected._id === friend._id ? "active" : ""
-            }`}
-            key={friend._id}
-            onClick={() => selectFriend(friend)}
-          >
-            <h4>{friend.username}</h4>
-          </li>
-        ))}
-      </ul>
+      {friendsData.length === 0 ? (
+        <p>No friends available.</p>
+      ) : (
+        <ul className="app-mychat-people_list">
+          {friendsData.map((friend) => (
+            <li
+              className={`app-mychat-people_list-item ${
+                selected && selected._id === friend._id ? "active" : ""
+              }`}
+              key={friend._id}
+              onClick={() => selectFriend(friend)}
+            >
+              <h4>{friend.username}</h4>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

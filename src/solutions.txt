@@ -1,0 +1,10 @@
+
+
+Maintain a global current message object
+
+when a friend selected from the list an object should be set up and message should be empty
+
+1. click a friend
+    check if the object exist in the state
+    if not, set up an empty string
+    if yes, show the message

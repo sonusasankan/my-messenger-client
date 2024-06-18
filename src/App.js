@@ -1,24 +1,36 @@
 import { useContext, useEffect, useCallback, useState} from "react";
+import { BrowserRouter as Router, Route, Redirect, Switch, Routes, Navigate } from 'react-router-dom';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
+import Home from './pages/Home.jsx';
+import PrivateRoute from './routes/PrivateRoute.jsx'; // Import your PrivateRoute component
 
 //context
-import { MessageContext, MessageDispatchContext, UserContext, SelectedFriendContext, SelectedFriendDispatchContext  } from "./store";
+import { MessageContext, MessageDispatchContext, SelectedFriendContext, SelectedFriendDispatchContext, AuthDispatchContext, AuthContext  } from "./store";
 
 //css
 import './assets/css/app.scss';
 
 //components
-import ChatWindow from "./components/ui/ChatWindow";
-import FriendsList from "./components/ui/FriendsList";
+import Chat from "./pages/Chat.jsx"
 
 function App() {
-  const user = useContext(UserContext)
+  const { user } = useContext(AuthContext);
   const messages = useContext(MessageContext);
   const selectedFriend = useContext(SelectedFriendContext);
   const selectedFriendDispatch = useContext(SelectedFriendDispatchContext);
   const [hasMore, setHasMore] = useState(true);
 
+  const [currentMessage, setCurrentMessage] = useState(null);
+  const [currentlyTyped, setCurrentlyTyped] = useState(null);
 
-  const messagesDispatch = useContext(MessageDispatchContext)
+  const isLoggedIn = useContext(AuthContext);
+
+
+  const messagesDispatch = useContext(MessageDispatchContext);
+
+  console.log(user);
+
 
   useEffect(() => {
     if (selectedFriend) {
@@ -89,17 +101,78 @@ function App() {
   };
 
   const handleSelectFriend = (friend) => {
-        selectedFriendDispatch({ type: 'SET_SELECTED_FRIEND', payload: friend});
+    selectedFriendDispatch({ type: 'SET_SELECTED_FRIEND', payload: friend });
+  
+    if (currentlyTyped && (!currentMessage || !currentMessage.hasOwnProperty(friend._id))) {
+      setCurrentMessage(prevMessages => ({
+        ...prevMessages,
+        [friend._id]: { message: '' }
+      }));
+    } else if (currentMessage && currentMessage[selectedFriend._id] && currentMessage[selectedFriend._id].message === '') {
+      // Create a copy of the currentMessage object
+      const newMessages = { ...currentMessage };
+  
+       // Check if the object has just one property
+    if (Object.keys(newMessages).length === 1) {
+       setCurrentMessage(null);
+    } else {
+      // Remove the friend from the copied object
+      delete newMessages[selectedFriend._id];
+      setCurrentMessage(newMessages);
+    }}
+  };
+
+  const handleCurrentMessage = (message) => {
+    setCurrentlyTyped(message);
+  
+    setCurrentMessage(prevMessages => ({
+      ...prevMessages,
+      [selectedFriend._id]: {
+        message: message
+      }
+    }));
+
+    setCurrentlyTyped(null);
   }
 
+
   return (
-      <div className="app-mychat">
-        <div className="app-mychat-chatbox">
-          <FriendsList selectFriend={handleSelectFriend} selected={selectedFriend ? selectedFriend: ''}/>
-          <ChatWindow onSendMessage={handleSendMessage} name={selectedFriend ? selectedFriend.username: ''} messages={messages.data} loadMoreMessages={loadMoreMessages} hasMore={hasMore}
- />
-        </div>
+    <Router>
+    <div className="app-mychat">
+      <div className="app-mychat-chatbox">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <Home />
+            </PrivateRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <PrivateRoute>
+                <Chat 
+                  selectFriend={handleSelectFriend} 
+                  selected={selectedFriend || ''} 
+                  setCurrentMessage={handleCurrentMessage}
+                  currentMessage={currentMessage && currentMessage[selectedFriend._id] ? currentMessage[selectedFriend._id].message : ''}
+                  onSendMessage={handleSendMessage}
+                  name={selectedFriend ? selectedFriend.username : ''}
+                  messages={messages.data}
+                  loadMoreMessages={loadMoreMessages}
+                  hasMore={hasMore}
+                  />
+              </PrivateRoute>
+              }
+            />
+        </Routes>
       </div>
+    </div>
+  </Router>
   );
 }
 

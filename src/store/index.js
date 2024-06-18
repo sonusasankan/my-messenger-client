@@ -1,4 +1,10 @@
-import { createContext, useReducer, useEffect} from "react";
+import { createContext, useReducer, useEffect, useState} from "react";
+
+//reducers
+import authReducer, { initialAuthData, SET_USER } from "./reducers/authReducer";
+
+export const AuthContext = createContext();
+export const AuthDispatchContext = createContext();
 
 export const UserContext = createContext();
 export const UserDispatchContext = createContext();
@@ -12,47 +18,24 @@ export const MessageDispatchContext = createContext(null);
 export const SelectedFriendContext = createContext();
 export const SelectedFriendDispatchContext = createContext();
 
+export const CurrentMessageContext = createContext();
+export const CurrentMessageContextDispatch = createContext();
+
 const selectedFriendData = {
   person: null
 };
 
-//User
-const initialUser = {
-  user: "6661b169d3f85f84e657c5fc",
-  isAuthenticated: false,
-};
-
-// Action types
-const SET_USER = "SET_USER";
-const UPDATE_USER = "UPDATE_USER";
-const LOGOUT = "LOGOUT";
-const SET_SELECTED_FRIEND = "SET_SELECTED_FRIEND";
-
-
-//User Reducer function
-const userReducer = (state, action) => {
+const currentMessagedata = {};
+const currentMessageReducer = (state, action) => {
   switch (action.type) {
-    case SET_USER:
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: true,
-      };
-    case UPDATE_USER:
-      return {
-        ...state,
-        user: { ...state.user, ...action.payload },
-      };
-    case LOGOUT:
-      return {
-        ...state,
-        user: null,
-        isAuthenticated: false,
-      };
+    case 'SET_CURRENT_MESSAGE':
+       return action.payload;
     default:
       return state;
   }
 };
+
+const SET_SELECTED_FRIEND = "SET_SELECTED_FRIEND";
 
 //Setting up an empty array for initial data
 const initialData = {
@@ -92,6 +75,11 @@ const friendsReducer = (state, action) => {
         loading: false,
         error: action.payload,
       };
+    case 'ADD_FRIEND':
+    return {
+      ...state,
+      friendsList: [...state.friendsList, action.payload],
+    };
     default:
       return state;
   }
@@ -158,50 +146,101 @@ const selectedFriendReducer = (state, action) => {
 
 //Function to return the products and cart context provider.
 export function ContextProvider({ children }) {
-  const [userData, userDispatch] = useReducer(userReducer, initialUser);
+  const [loading, setLoading] = useState(true);
+  const [authState, authDispatch] = useReducer(authReducer, initialAuthData);
   const [friendsData, friendsDispatch] = useReducer(friendsReducer, initialData);
   const [messages, messagesDispatch] = useReducer(
     messageReducer,
     initialMessages
   );
   const [selectedFriend, selectedFriendDispatch] = useReducer(selectedFriendReducer, selectedFriendData);
+  const [currentMessage, CurrentMessageDispatch] = useReducer(currentMessageReducer, currentMessagedata);
 
-  const { user } = userData;
+
+  const { user, isAuthenticated } = authState;
   const { friendsList } = friendsData;
   const { person } = selectedFriend;
 
   useEffect(() => {
-    // Fetch the most recent friend when the component mounts
-    fetch(`http://localhost:5000/api/messages/recent/${user}`)
-      .then((response) => response.json())
-      .then((mostRecentFriend) => {
-        selectedFriendDispatch({ type: SET_SELECTED_FRIEND, payload: mostRecentFriend });
-      });
-  }, [user]);
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('http://localhost:5000/api/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          authDispatch({ type: SET_USER, payload: data });
+          setLoading(false);
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }    
+  }, []);
 
-  useEffect(()=>{
-    fetch(`http://localhost:5000/api/friends/${user}`)
-    .then(response => response.json())
-    .then(data => friendsDispatch({ type: 'FETCH_SUCCESS', payload: data}))
-  })
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     fetch(`http://localhost:5000/api/friends/${user._id}`)
+  //       .then((response) => response.json())
+  //       .then((data) => friendsDispatch({ type: 'FETCH_SUCCESS', payload: data }))
+  //       .catch((error) => friendsDispatch({ type: 'FETCH_ERROR', payload: error }));
+  //   }
+  // }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (isAuthenticated && selectedFriend.person) {
+      CurrentMessageDispatch({
+        type: 'SET_CURRENT_MESSAGE',
+        payload: { [selectedFriend.person._id]: { message: '' } },
+      });
+    }
+  }, [isAuthenticated, selectedFriend]);
+
+  useEffect(() => {
+    if (isAuthenticated && selectedFriend.person) {
+      fetch(`http://localhost:5000/api/messages/recent/${user._id}`)
+        .then((response) => response.json())
+        .then((mostRecentFriend) => {
+          selectedFriendDispatch({ type: 'SET_SELECTED_FRIEND', payload: mostRecentFriend });
+        });
+    }
+  }, [isAuthenticated, user, selectedFriend]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <UserContext.Provider value={user}>
-      <UserDispatchContext.Provider value={userDispatch}>
-        <FriendsContext.Provider value={friendsList}>
-          <FriendsDispatchContext.Provider value={friendsDispatch}>
-            <MessageContext.Provider value={messages}>
-              <MessageDispatchContext.Provider value={messagesDispatch}>
-                <SelectedFriendContext.Provider value={person}>
-                    <SelectedFriendDispatchContext.Provider value={selectedFriendDispatch}>
-                      {children}
-                    </SelectedFriendDispatchContext.Provider>
-                </SelectedFriendContext.Provider>
-              </MessageDispatchContext.Provider>
-            </MessageContext.Provider>
-          </FriendsDispatchContext.Provider>
-        </FriendsContext.Provider>
-      </UserDispatchContext.Provider>
-    </UserContext.Provider>
+    <AuthContext.Provider value={authState}>
+      <AuthDispatchContext.Provider value={authDispatch}>
+          <FriendsContext.Provider value={friendsList}>
+            <FriendsDispatchContext.Provider value={friendsDispatch}>
+              <MessageContext.Provider value={messages}>
+                <MessageDispatchContext.Provider value={messagesDispatch}>
+                  <SelectedFriendContext.Provider value={person}>
+                      <SelectedFriendDispatchContext.Provider value={selectedFriendDispatch}>
+                        <CurrentMessageContext.Provider value={currentMessage}>
+                          <CurrentMessageContextDispatch.Provider value={CurrentMessageDispatch}>
+                            {children}
+                          </CurrentMessageContextDispatch.Provider>
+                        </CurrentMessageContext.Provider>
+                      </SelectedFriendDispatchContext.Provider>
+                  </SelectedFriendContext.Provider>
+                </MessageDispatchContext.Provider>
+              </MessageContext.Provider>
+            </FriendsDispatchContext.Provider>
+          </FriendsContext.Provider>
+      </AuthDispatchContext.Provider>
+    </AuthContext.Provider>
   );
 }
