@@ -1,0 +1,38 @@
+
+.app-login{
+    display: flex;
+    min-height: 100vh;
+    min-width: 100vw;
+    width: 100vw;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to right, $secondary-color 60%, #fff 140%); /* Gradient from left to right */
+    .app-login-wrapper{
+        width: 300px;
+        .btn--login{
+            margin-bottom: 16px;
+        }
+        .app-login__cta{
+            font-size: 14px;
+        }
+    }
+    // &__form{
+    //     padding: 24px;
+    // }
+}
+
+
+.app-input-group{
+    label{
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    .app-input-control{
+        min-height: 48px;
+        max-height: 48px;
+        margin-bottom: 24px;
+        background-color: transparent;
+        outline: none;
+        border: 1px solid #ae9077;
+    }
+}

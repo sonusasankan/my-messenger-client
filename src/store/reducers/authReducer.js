@@ -8,6 +8,7 @@ const REGISTER_FAILURE = "REGISTER_FAILURE";
 const initialAuthData = {
   user: null,
   isAuthenticated: false,
+  hasFriendList: false
 };
 
 const authReducer = (state, action) => {

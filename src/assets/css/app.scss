@@ -8,6 +8,31 @@ $secondary-color: #D8BFAA;
 $teritiary-color: #EBF5EE;
 $white: #ffffff;
 
+//partials
+@import './partials/login';
+@import './partials/button';
+
+body{
+    font-family: $primary-font;
+}
+.d-flex{
+    display: flex;
+}
+.flex-column{
+    flex-direction: column;
+}
+
+.align-center{
+    align-items: center;
+}
+
+.justify-center{
+    justify-content: center;
+}
+.justify-space-between{
+    justify-content: space-between;
+}
+
 h1,h2,h3,h4,h5,h6{
     font-family: $primary-font;
 }
@@ -17,10 +42,23 @@ h1,h2,h3,h4,h5,h6{
     font-weight: 400;
     font-style: normal;
 }
-
+.app-layout{
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    .app-header{
+        background-color: $secondary-color;
+        padding: 0 16px;
+        min-height: 48px;
+        max-height: 48px;
+    }
+}
+.app-mychat{
+    flex: 1;
+}
 .app-mychat-chatbox{
     display: flex;
-    min-height: 100vh;
+    height: 100%;
 }
 
 .app-mychat-people{
@@ -37,7 +75,7 @@ h1,h2,h3,h4,h5,h6{
     max-height: 100vh;
     &_chat-header{
         padding: 16px;
-        background-color: $secondary-color;
+        background-color: #dce4df;
         h6{
             font-weight: 600;
         }
@@ -120,6 +158,27 @@ h1,h2,h3,h4,h5,h6{
         }
         &.active{
             background-color: #431835;
+        }
+    }
+}
+
+.app-network{
+    display: flex;
+    flex-grow: 1;
+    padding: 16px;
+    .app-friends, .app-existing-friends{
+        flex-grow: 1;
+    }
+    li{
+        display: flex;
+        padding: 16px;
+    }
+}
+
+.app-navigation{
+    .app-navigation_list-item{
+        &:not(:last-child){
+            margin-right: 16px;
         }
     }
 }

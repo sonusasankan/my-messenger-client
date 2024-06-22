@@ -2,11 +2,11 @@ import { useContext, useEffect, useCallback, useState} from "react";
 import { BrowserRouter as Router, Route, Redirect, Switch, Routes, Navigate } from 'react-router-dom';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
-import Home from './pages/Home.jsx';
+import Network from './pages/Network.jsx';
 import PrivateRoute from './routes/PrivateRoute.jsx'; // Import your PrivateRoute component
 
 //context
-import { MessageContext, MessageDispatchContext, SelectedFriendContext, SelectedFriendDispatchContext, AuthDispatchContext, AuthContext  } from "./store";
+import { MessageContext, MessageDispatchContext, SelectedFriendContext, SelectedFriendDispatchContext, AuthDispatchContext, AuthContext, FriendsDispatchContext  } from "./store";
 
 //css
 import './assets/css/app.scss';
@@ -28,16 +28,14 @@ function App() {
 
 
   const messagesDispatch = useContext(MessageDispatchContext);
-
-  console.log(user);
-
+  const friendsDispatch = useContext(FriendsDispatchContext);
 
   useEffect(() => {
     if (selectedFriend) {
       const fetchMessages = async () => {
         messagesDispatch({ type: 'FETCH_INIT' });
         try {
-          const response = await fetch(`http://localhost:5000/api/messages?sender=${user}&receiver=${selectedFriend._id}`);
+          const response = await fetch(`http://localhost:5000/api/messages?sender=${user._id}&receiver=${selectedFriend._id}`);
           const data = await response.json();
           messagesDispatch({ type: 'FETCH_SUCCESS', payload: data });
         } catch (error) {
@@ -46,15 +44,15 @@ function App() {
       };
       fetchMessages();
     }
-  }, [selectedFriend, user, messagesDispatch]);
+  }, [selectedFriend, messagesDispatch]);
 
   const fetchMessagesNew = useCallback(async () => {
     if (!selectedFriend) return;
-    const response = await fetch(`http://localhost:5000/api/messages?sender=${user}&receiver=${selectedFriend._id}&limit=10`);
+    const response = await fetch(`http://localhost:5000/api/messages?sender=${user._id}&receiver=${selectedFriend._id}&limit=10`);
     const data = await response.json();
     messagesDispatch({ type: 'FETCH_SUCCESS', payload: data });
     setHasMore(data.length >= 10);
-  }, [selectedFriend, user, messagesDispatch]);
+  }, [selectedFriend, messagesDispatch]);
 
   useEffect(() => {
     fetchMessagesNew();
@@ -81,6 +79,7 @@ function App() {
 
 
   const handleSendMessage = async (message) => {
+    friendsDispatch({ type: 'UPDATE', payload: selectedFriend });
     try {
       const response = await fetch('http://localhost:5000/api/messages', {
         method: 'POST',
@@ -138,8 +137,6 @@ function App() {
 
   return (
     <Router>
-    <div className="app-mychat">
-      <div className="app-mychat-chatbox">
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -147,7 +144,7 @@ function App() {
           path="/"
           element={
             <PrivateRoute>
-              <Home />
+              <Network />
             </PrivateRoute>
             }
           />
@@ -170,8 +167,6 @@ function App() {
               }
             />
         </Routes>
-      </div>
-    </div>
   </Router>
   );
 }
