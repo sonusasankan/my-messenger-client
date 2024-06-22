@@ -5,6 +5,8 @@ import Register from './pages/Register.jsx';
 import Network from './pages/Network.jsx';
 import PrivateRoute from './routes/PrivateRoute.jsx'; // Import your PrivateRoute component
 
+import { baseURL } from "./env";
+
 //context
 import { MessageContext, MessageDispatchContext, SelectedFriendContext, SelectedFriendDispatchContext, AuthDispatchContext, AuthContext, FriendsDispatchContext  } from "./store";
 
@@ -35,7 +37,7 @@ function App() {
       const fetchMessages = async () => {
         messagesDispatch({ type: 'FETCH_INIT' });
         try {
-          const response = await fetch(`http://localhost:5000/api/messages?sender=${user._id}&receiver=${selectedFriend._id}`);
+          const response = await fetch(`${baseURL}/api/messages?sender=${user._id}&receiver=${selectedFriend._id}`);
           const data = await response.json();
           messagesDispatch({ type: 'FETCH_SUCCESS', payload: data });
         } catch (error) {
@@ -48,7 +50,7 @@ function App() {
 
   const fetchMessagesNew = useCallback(async () => {
     if (!selectedFriend) return;
-    const response = await fetch(`http://localhost:5000/api/messages?sender=${user._id}&receiver=${selectedFriend._id}&limit=10`);
+    const response = await fetch(`${baseURL}/api/messages?sender=${user._id}&receiver=${selectedFriend._id}&limit=10`);
     const data = await response.json();
     messagesDispatch({ type: 'FETCH_SUCCESS', payload: data });
     setHasMore(data.length >= 10);
@@ -62,7 +64,7 @@ function App() {
     if (!selectedFriend || !messages.data.length) return;
     
     const lastMessage = messages.data[0];
-    const response = await fetch(`http://localhost:5000/api/messages/load?sender=${user}&receiver=${selectedFriend._id}&before=${lastMessage.timestamp}&limit=5`);
+    const response = await fetch(`${baseURL}/api/messages/load?sender=${user}&receiver=${selectedFriend._id}&before=${lastMessage.timestamp}&limit=5`);
     const data = await response.json();
 
     // Check for duplicates and only add new messages
@@ -81,7 +83,7 @@ function App() {
   const handleSendMessage = async (message) => {
     friendsDispatch({ type: 'UPDATE', payload: selectedFriend });
     try {
-      const response = await fetch('http://localhost:5000/api/messages', {
+      const response = await fetch(`${baseURL}/api/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

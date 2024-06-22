@@ -1,4 +1,5 @@
 import { createContext, useReducer, useEffect, useState, useContext} from "react";
+import { baseURL } from "../env";
 
 //Services
 import { userLogin , fetchFriendlist, fetchAllUsers } from "../services";
@@ -170,7 +171,7 @@ export function ContextProvider({ children }) {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetch(`http://localhost:5000/api/messages/recent/${user._id}`)
+      fetch(`${baseURL}/api/messages/recent/${user._id}`)
         .then((response) => response.json())
         .then((mostRecentFriend) => {
           selectedFriendDispatch({ type: 'SET_SELECTED_FRIEND', payload: mostRecentFriend });

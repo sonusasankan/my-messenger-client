@@ -3,6 +3,8 @@ import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext, AuthDispatchContext } from "../store";
 
+import { baseURL } from "../env";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +25,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${baseURL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

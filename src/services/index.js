@@ -1,6 +1,7 @@
+import { baseURL } from "../env";
 
 export const userLogin = async (token) => {
-    const response = await fetch('http://localhost:5000/api/auth/me', {
+    const response = await fetch(`${baseURL}/api/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -14,7 +15,7 @@ export const userLogin = async (token) => {
 }
 
 export const fetchFriendlist = async (userID) => {
-  const response = await fetch(`http://localhost:5000/api/friends/${userID}`);
+  const response = await fetch(`${baseURL}/api/friends/${userID}`);
   if (!response.ok) {
     if (response.status === 404) {
       throw new Error('Friend list not found');
@@ -30,7 +31,7 @@ export const fetchFriendlist = async (userID) => {
 //get all users to populate on network page
 export const fetchAllUsers = async (token) => {
   try {
-    const response = await fetch(`http://localhost:5000/api/users/allUsers`, {
+    const response = await fetch(`${baseURL}/api/users/allUsers`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
