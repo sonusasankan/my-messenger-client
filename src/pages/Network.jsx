@@ -3,6 +3,8 @@ import { fetchAllUsers } from "../services";
 import { AuthContext } from '../store';
 import { FriendsDispatchContext, FriendsContext } from "../store";
 
+import { baseURL } from "../env";
+
 //layout
 import Layout from "../layout/Layout.jsx";
 
@@ -41,7 +43,7 @@ const Network = () => {
     const friendId = friend._id;
 
     try {
-      const response = await fetch("http://localhost:5000/api/friends/add", {
+      const response = await fetch(`${baseURL}/api/friends/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +69,7 @@ const Network = () => {
     const token = localStorage.getItem('token');
     const friendId = friend._id;
     try {
-      const response = await fetch("http://localhost:5000/api/friends/remove", {
+      const response = await fetch(`${baseURL}/api/friends/remove`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
