@@ -14,10 +14,10 @@ const Login = () => {
 
   useEffect(() => {
     if (authState.isAuthenticated) {
-      if (authState.user.isNewUser) {
-        navigate("/network");
+      if (authState.user.hasFriends) {
+         navigate("/chat");
       } else {
-        navigate("/chat");
+        navigate("/network");
       }
     }
   }, [authState, navigate]);

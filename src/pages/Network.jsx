@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { fetchAllUsers } from "../services";
-import { AuthContext } from '../store';
+import { AuthContext, AuthDispatchContext } from '../store';
 import { FriendsDispatchContext, FriendsContext } from "../store";
 
 import { baseURL } from "../env";
@@ -14,10 +14,12 @@ const Network = () => {
   const [isFriendsLoading, setFriendsLoading] = useState(true);
   const [error, setError] = useState('');
   const authState = useContext(AuthContext);
+  const authDispatch = useContext(AuthDispatchContext);
   const friendsData = useContext(FriendsContext);
   const { friendsList, loading, dataLoaded} = friendsData;
   const friendsDispatch = useContext(FriendsDispatchContext);
   const userId = authState.user._id;
+  const hasFriends = authState.user.hasFriends;
 
   useEffect(() => {
     setFriendsLoading(false);
@@ -58,6 +60,11 @@ const Network = () => {
 
       const result = await response.json();
       friendsDispatch({ type: 'ADD_FRIEND', payload: result });
+
+      if(!hasFriends){
+        authDispatch({ type: 'UPDATE_USER', payload: { hasFriends: true}})
+      }
+
       const newUsers = users.filter((user)=> user._id !== friendId);
       setUsers(newUsers);
     } catch (err) {
@@ -84,6 +91,7 @@ const Network = () => {
       const result = await response.json();
 
       friendsDispatch({ type: 'REMOVE_FRIEND', payload: { _id: friendId } });
+
       setUsers((prev)=>[...prev, result]);
     } catch (err) {
       console.log(err.message);

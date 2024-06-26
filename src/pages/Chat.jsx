@@ -8,11 +8,8 @@ import FriendsList from "../components/ui/FriendsList";
 const Chat = ({
   selectFriend,
   selected,
-  setCurrentMessage,
-  currentMessage,
   onSendMessage,
   name,
-  messages,
   loadMoreMessages,
   hasMore,
 }) => {
@@ -25,11 +22,8 @@ const Chat = ({
             selected={selected}
           ></FriendsList>
           <ChatWindow
-            setCurrentMessage={setCurrentMessage}
-            currentMessage={currentMessage}
             onSendMessage={onSendMessage}
             name={name}
-            messages={messages}
             loadMoreMessages={loadMoreMessages}
             hasMore={hasMore}
           />

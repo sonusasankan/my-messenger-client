@@ -1,5 +1,28 @@
 import { baseURL } from "../env";
 
+export const userRegister = async (username, email, password, profilePicture) => {
+  const response = await fetch(`${baseURL}/api/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+      profilePicture,
+      hasFriends: false,
+      hasMessages: false
+    }),
+  })
+  if (!response.ok) {
+  throw new Error('Network response was not ok');
+  }
+
+  const data = await response.json();
+  return data;
+}
+
 export const userLogin = async (token) => {
     const response = await fetch(`${baseURL}/api/auth/me`, {
         headers: {

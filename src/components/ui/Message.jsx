@@ -1,10 +1,12 @@
 import { useContext} from 'react';
-import { UserContext } from "../../store";
+import { AuthContext } from "../../store";
 
 function Message({ message, sender }) {
-  const user = useContext(UserContext);
+  const authState = useContext(AuthContext);
+  const { user } = authState;
+
   return (
-    <div className={`app-mychat-chatbox_message-item ${sender === user? "right": "left"}`}>
+    <div className={`app-mychat-chatbox_message-item ${sender === user._id? "right": "left"}`}>
       <p className="app-mychat-chatbox-message-text">{message}</p>
     </div>
   );

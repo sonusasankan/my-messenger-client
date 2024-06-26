@@ -1,11 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import sendSvg from '../../assets/images/send.svg';
 
-function MessageInput({ onSendMessage, currentMessage, setCurrentMessage }) {
-  const [message, setMessage] = useState(currentMessage);
+import { CurrentMessageContextDispatch, SelectedFriendContext, CurrentMessageContext } from "../../store";
+
+function MessageInput({ onSendMessage, setCurrentMessage }) {
+  const currentMessageData = useContext(CurrentMessageContext);
+  const selectedFriend = useContext(SelectedFriendContext);
+  const [message, setMessage] = useState('');
   const [isValid, setIsValid] = useState(false);
 
+
+  const CurrentMessageDispatch = useContext(CurrentMessageContextDispatch);
+
+  useEffect(()=>{
+    
+    if(selectedFriend && currentMessageData.hasOwnProperty(selectedFriend._id)){
+      setMessage(currentMessageData[selectedFriend._id])
+    } else {
+      setMessage('');
+    }
+
+  },[selectedFriend])
+  
   useEffect(() => {
     // Validate the message
     if (message.trim().length > 0) {
@@ -15,21 +32,30 @@ function MessageInput({ onSendMessage, currentMessage, setCurrentMessage }) {
     }
   }, [message]);
 
-  useEffect(()=>{
-    setMessage(currentMessage);
-  },[currentMessage])
+  // useEffect(()=>{
+  //   setMessage(currentMessage);
+  // },[currentMessage])
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isValid) {
       onSendMessage(message);
-      setCurrentMessage('');
+      setMessage('');
     }
   };
 
   const handleSetMessage = (e) => {
     setMessage(e.target.value);
-    setCurrentMessage(e.target.value);
+  }
+
+  const handleOnBlur = (e) => {
+    if(e.target.value){
+      CurrentMessageDispatch({ type: "SET_CURRENT_MESSAGE", payload: {message: e.target.value, friendID: selectedFriend._id}})
+    } else {
+      if(selectedFriend && currentMessageData.hasOwnProperty(selectedFriend._id)){
+        CurrentMessageDispatch({ type: 'REMOVE_CURRENT_MESSAGE', payload: { friendID: selectedFriend._id } });
+      }
+    }
   }
 
   const handleKeyDown = (e) => {
@@ -45,6 +71,7 @@ function MessageInput({ onSendMessage, currentMessage, setCurrentMessage }) {
         type="text"
         value={message}
         onChange={handleSetMessage}
+        onBlur={handleOnBlur}
         onKeyDown={handleKeyDown}
         placeholder="Type your message"
         

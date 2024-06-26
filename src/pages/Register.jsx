@@ -4,8 +4,10 @@ import { useNavigate } from "react-router-dom";
 import {
   AuthContext,
   AuthDispatchContext,
-  UserDispatchContext,
 } from "../store";
+
+//services
+import { userRegister } from "../services"
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -19,21 +21,9 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-          profilePicture,
-        }),
-      });
-      const newUser = await response.json();
-      authDispatch({ type: "REGISTER_SUCCESS", payload: newUser });
-      UserDispatchContext({ type: "SET_USER", payload: newUser });
+      const result = await userRegister(username, email, password, profilePicture);
+      authDispatch({ type: "REGISTER_SUCCESS", payload: result.user });
+      localStorage.setItem("token", result.token);
       navigate("/");
     } catch (error) {
       authDispatch({ type: "REGISTER_FAILURE", payload: error });

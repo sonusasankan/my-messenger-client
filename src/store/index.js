@@ -8,11 +8,11 @@ import { userLogin , fetchFriendlist, fetchAllUsers } from "../services";
 import authReducer, { initialAuthData, SET_USER } from "./reducers/authReducer";
 import friendsReducer, { initialFriendsData } from "./reducers/friendsReducer";
 
-export const AuthContext = createContext();
-export const AuthDispatchContext = createContext();
+export const AuthContext = createContext('AuthContext');
+export const AuthDispatchContext = createContext('AuthDispatchContext');
 
-export const UserContext = createContext();
-export const UserDispatchContext = createContext();
+// export const UserContext = createContext();
+// export const UserDispatchContext = createContext();
 
 export const FriendsContext = createContext();
 export const FriendsDispatchContext = createContext(null);
@@ -34,7 +34,14 @@ const currentMessagedata = {};
 const currentMessageReducer = (state, action) => {
   switch (action.type) {
     case 'SET_CURRENT_MESSAGE':
-       return action.payload;
+       return {
+        ...state,
+        [action.payload.friendID]: action.payload.message
+       }
+    case 'REMOVE_CURRENT_MESSAGE': {
+    const { [action.payload.friendID]: removedMessage, ...newState } = state;
+    return newState;
+  }
     default:
       return state;
   }
@@ -45,7 +52,7 @@ const SET_SELECTED_FRIEND = "SET_SELECTED_FRIEND";
 
 //Initial message data
 export const initialMessages = {
-  data: [],
+  messages: [],
   loading: false,
   error: null,
 };
@@ -62,7 +69,7 @@ export const messageReducer = (state, action) => {
     case "FETCH_SUCCESS":
       return {
         ...state,
-        data: action.payload,
+        messages: action.payload,
         loading: false,
         error: null,
       };
@@ -75,7 +82,7 @@ export const messageReducer = (state, action) => {
     case "POST_SUCCESS":
       return {
         ...state,
-        data: [...state.data, action.payload],
+        messages: [...state.messages, action.payload],
         loading: false,
         error: null,
       };
@@ -103,7 +110,7 @@ const selectedFriendReducer = (state, action) => {
   }
 };
 
-//Function to return the products and cart context provider.
+//Function to return the initial data.
 export function ContextProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [authState, authDispatch] = useReducer(authReducer, initialAuthData);
@@ -116,7 +123,8 @@ export function ContextProvider({ children }) {
   const [currentMessage, CurrentMessageDispatch] = useReducer(currentMessageReducer, currentMessagedata);
 
 
-  const { user, isAuthenticated } = authState;
+  const { user, isAuthenticated, isNewUser } = authState;
+
   // const { friendsList } = friendsData;
   const { person } = selectedFriend;
   
@@ -145,7 +153,7 @@ export function ContextProvider({ children }) {
 
   //Fetch friends list for initial data.
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user.hasFriends) {
       friendsDispatch({ type: 'FETCH_START' });
       const getFriends = async () => {
         try {
@@ -161,16 +169,8 @@ export function ContextProvider({ children }) {
   
 
   useEffect(() => {
-    if (isAuthenticated && selectedFriend.person) {
-      CurrentMessageDispatch({
-        type: 'SET_CURRENT_MESSAGE',
-        payload: { [selectedFriend.person._id]: { message: '' } },
-      });
-    }
-  }, [isAuthenticated, selectedFriend]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user.hasMessages) {
+      //fetch init
       fetch(`${baseURL}/api/messages/recent/${user._id}`)
         .then((response) => response.json())
         .then((mostRecentFriend) => {

@@ -26,27 +26,9 @@ function App() {
   const [currentMessage, setCurrentMessage] = useState(null);
   const [currentlyTyped, setCurrentlyTyped] = useState(null);
 
-  const isLoggedIn = useContext(AuthContext);
-
 
   const messagesDispatch = useContext(MessageDispatchContext);
   const friendsDispatch = useContext(FriendsDispatchContext);
-
-  useEffect(() => {
-    if (selectedFriend) {
-      const fetchMessages = async () => {
-        messagesDispatch({ type: 'FETCH_INIT' });
-        try {
-          const response = await fetch(`${baseURL}/api/messages?sender=${user._id}&receiver=${selectedFriend._id}`);
-          const data = await response.json();
-          messagesDispatch({ type: 'FETCH_SUCCESS', payload: data });
-        } catch (error) {
-          messagesDispatch({ type: 'FETCH_FAILURE', payload: error });
-        }
-      };
-      fetchMessages();
-    }
-  }, [selectedFriend, messagesDispatch]);
 
   const fetchMessagesNew = useCallback(async () => {
     if (!selectedFriend) return;
@@ -103,38 +85,7 @@ function App() {
 
   const handleSelectFriend = (friend) => {
     selectedFriendDispatch({ type: 'SET_SELECTED_FRIEND', payload: friend });
-  
-    if (currentlyTyped && (!currentMessage || !currentMessage.hasOwnProperty(friend._id))) {
-      setCurrentMessage(prevMessages => ({
-        ...prevMessages,
-        [friend._id]: { message: '' }
-      }));
-    } else if (currentMessage && currentMessage[selectedFriend._id] && currentMessage[selectedFriend._id].message === '') {
-      // Create a copy of the currentMessage object
-      const newMessages = { ...currentMessage };
-  
-       // Check if the object has just one property
-    if (Object.keys(newMessages).length === 1) {
-       setCurrentMessage(null);
-    } else {
-      // Remove the friend from the copied object
-      delete newMessages[selectedFriend._id];
-      setCurrentMessage(newMessages);
-    }}
   };
-
-  const handleCurrentMessage = (message) => {
-    setCurrentlyTyped(message);
-  
-    setCurrentMessage(prevMessages => ({
-      ...prevMessages,
-      [selectedFriend._id]: {
-        message: message
-      }
-    }));
-
-    setCurrentlyTyped(null);
-  }
 
 
   return (
@@ -157,11 +108,8 @@ function App() {
                 <Chat 
                   selectFriend={handleSelectFriend} 
                   selected={selectedFriend || ''} 
-                  setCurrentMessage={handleCurrentMessage}
-                  currentMessage={currentMessage && currentMessage[selectedFriend._id] ? currentMessage[selectedFriend._id].message : ''}
                   onSendMessage={handleSendMessage}
                   name={selectedFriend ? selectedFriend.username : ''}
-                  messages={messages.data}
                   loadMoreMessages={loadMoreMessages}
                   hasMore={hasMore}
                   />

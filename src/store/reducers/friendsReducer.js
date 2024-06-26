@@ -3,7 +3,6 @@
 const initialFriendsData = {
     friendsList: [
     ],
-    hasFriends: false,
     recent: "",
     loading: true,
     dataLoaded: false,
@@ -23,7 +22,6 @@ const friendsReducer = (state, action) => {
         return {
           ...state,
           friendsList: action.payload,
-          hasFriends: true,
           loading: false,
           dataLoaded: true,
           error: null,

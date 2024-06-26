@@ -16,6 +16,10 @@ function FriendsList({ selectFriend, selected }) {
       setIsEmpty(false);
     }
   }, [friendsList, dataLoaded]);
+  
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   if (loading) {
     return(
@@ -27,10 +31,6 @@ function FriendsList({ selectFriend, selected }) {
         </ul>
       </div>
     );
-  }
-
-  if (error) {
-    return <p>Error: {error}</p>;
   }
 
   if (!dataLoaded) {

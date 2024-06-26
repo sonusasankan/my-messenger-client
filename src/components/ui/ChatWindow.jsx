@@ -6,13 +6,13 @@ import MessageInput from '../form/MessageInput';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
 
-function ChatWindow({ name, messages, onSendMessage, loadMoreMessages, hasMore, currentMessage, setCurrentMessage }) {
+function ChatWindow({ name, onSendMessage, loadMoreMessages, hasMore }) {
    
   return (
     <div className="app-mychat-window">
       <ChatHeader name={name}/>
-      <MessageList messages={messages} loadMoreMessages={loadMoreMessages} hasMore={hasMore}/>
-      <MessageInput currentMessage={currentMessage} onSendMessage={onSendMessage} setCurrentMessage={setCurrentMessage}  />
+      <MessageList loadMoreMessages={loadMoreMessages} hasMore={hasMore}/>
+      <MessageInput onSendMessage={onSendMessage} />
     </div>
   );
 }
